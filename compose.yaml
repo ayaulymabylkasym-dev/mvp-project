@@ -1,0 +1,54 @@
+
+services:
+  postgres_primary:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: projectdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    command: ["postgres", "-c", "wal_level=replica", "-c", "max_wal_senders=10", "-c", "wal_keep_size=128MB"]
+    volumes:
+      - primary_data:/var/lib/postgresql/data
+      - ./primary-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d projectdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres_standby:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: projectdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    depends_on:
+      postgres_primary:
+        condition: service_healthy
+    volumes:
+      - standby_data:/var/lib/postgresql/data
+      - ./standby/setup-standby.sh:/setup-standby.sh:ro
+    entrypoint: ["sh", "/setup-standby.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d projectdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: ./app
+    ports:
+      - "127.0.0.1:8083:5000"
+    environment:
+      WRITE_DB_URL: postgresql://appuser:apppass@postgres_primary:5432/projectdb
+      READ_DB_URL: postgresql://appuser:apppass@postgres_standby:5432/projectdb
+      SECRET_KEY: super-secret-key-change-me
+    depends_on:
+      postgres_primary:
+        condition: service_healthy
+      postgres_standby:
+        condition: service_healthy
+
+volumes:
+  primary_data:
+  standby_data:

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Байланыстар{% endblock %}
+{% block content %}
+<h2>Біздің кеңселер және байланыс ақпараты</h2>
+{% for o in offices %}
+<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 6px;">
+    <h3>{{ o[0] }}</h3>
+    <p><b>Мекенжайы:</b> {{ o[1] }}</p>
+    <p><b>Телефон:</b> {{ o[2] }}</p>
+    <p><b>Email:</b> {{ o[3] }}</p>
+</div>
+{% endfor %}
+
+<h3>GitHub Репозиторий</h3>
+<p>Жобаның бастапқы коды мен нұсқаулығы мына сілтемеде орналасқан: 
+   <a href="https://github.com/ayaulymabylkasym-dev/mvp-project.git" target="_blank">GitHub Репозиторийіне өту</a>
+</p>
+{% endblock %}

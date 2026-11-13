@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Кіру{% endblock %}
+{% block content %}
+<h2>Жүйеге кіру</h2>
+{% if error %}
+    <div class="error">{{ error }}</div>
+{% endif %}
+<form method="POST">
+    <label>Email:</label>
+    <input type="email" name="email" required placeholder="example@domain.kz">
+    
+    <label>Пароль:</label>
+    <input type="password" name="password" required placeholder="Құпия сөзіңіз">
+    
+    <button type="submit" class="btn">Кіру</button>
+</form>
+<p>Аккаунтыңыз жоқ па? <a href="{{ url_for('register') }}">Тіркелу</a></p>
+{% endblock %}

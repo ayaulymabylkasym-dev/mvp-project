@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Пайдаланушы кабинеті{% endblock %}
+{% block content %}
+<h2>👤 Жеке кабинет</h2>
+<div style="background: #eef2f7; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+    <p><b>Аты-жөні:</b> {{ session.get('full_name') }}</p>
+    <p><b>Email:</b> {{ session.get('email') }}</p>
+    <p><b>Рөлі:</b> <span style="background: #2196F3; color: white; padding: 2px 8px; border-radius: 4px;">{{ session.get('role') }}</span></p>
+</div>
+
+<h3>📝 Тур бойынша сауалнама қалдыру</h3>
+<form method="POST" action="{{ url_for('submit_survey') }}">
+    <label>Өнімді таңдаңыз:</label>
+    <select name="product_id" required>
+        {% for p in products %}
+        <option value="{{ p[0] }}">{{ p[1] }}</option>
+        {% endfor %}
+    </select>
+
+    <label>Бағалау (1-ден 5-ке дейін):</label>
+    <select name="rating" required>
+        <option value="5">5 - Өте жақсы</option>
+        <option value="4">4 - Жақсы</option>
+        <option value="3">3 - Қанағаттанарлық</option>
+        <option value="2">2 - Нашар</option>
+        <option value="1">1 - Өте нашар</option>
+    </select>
+
+    <label>Сапар мақсаты / Ниеті:</label>
+    <input type="text" name="intent" required placeholder="Мысалы: Демалыс, отбасымен саяхат">
+
+    <label>Пікір немесе ұсыныс:</label>
+    <textarea name="comment" rows="3" placeholder="Өз әсеріңізді жазыңыз..."></textarea>
+
+    <button type="submit" class="btn">Сауалнаманы жіберу (Primary-ге жазу)</button>
+</form>
+{% endblock %}

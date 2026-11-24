@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Кіру{% endblock %}
 {% block content %}
-<h2>Жүйеге кіру</h2>
-{% if error %}
-    <div class="error">{{ error }}</div>
-{% endif %}
-<form method="POST">
-    <label>Email:</label>
-    <input type="email" name="email" required placeholder="example@domain.kz">
-    
-    <label>Пароль:</label>
-    <input type="password" name="password" required placeholder="Құпия сөзіңіз">
-    
-    <button type="submit" class="btn">Кіру</button>
-</form>
-<p>Аккаунтыңыз жоқ па? <a href="{{ url_for('register') }}">Тіркелу</a></p>
+<section class="panel narrow">
+  <h1>Жүйеге кіру</h1>
+  <form method="post" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div>
+      <label for="email">Email <span class="req">*</span></label>
+      <input id="email" name="email" type="email" maxlength="160" required
+             autocomplete="email" value="{{ email }}">
+    </div>
+    <div>
+      <label for="password">Пароль <span class="req">*</span></label>
+      <input id="password" name="password" type="password" required autocomplete="current-password">
+    </div>
+    <button type="submit">Кіру</button>
+  </form>
+  <p class="muted">Әлі тіркелмегенсіз бе? <a href="{{ url_for('register') }}">Тіркелу</a></p>
+</section>
 {% endblock %}

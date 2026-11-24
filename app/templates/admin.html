@@ -1,76 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Админ панель - Smart Tourism{% endblock %}
+{% block title %}Админ панелі{% endblock %}
 {% block content %}
-<h1 style="color: #b91c1c;">🛡 Әкімшілік панель (Admin Dashboard)</h1>
-<p>Бұл панель арқылы жүйедегі деректерді басқара аласыз. Барлық өзгерістер <b>Primary</b> серверге жазылады.</p>
+<h1>Админ панелі</h1>
+{% include "_admin_nav.html" %}
 
-<hr style="margin: 20px 0;">
+<div class="grid">
+  <div class="card stat"><b>{{ stats.products }}</b>Өнімдер</div>
+  <div class="card stat"><b>{{ stats.offices }}</b>Кеңселер</div>
+  <div class="card stat"><b>{{ stats.users }}</b>Пайдаланушылар</div>
+  <div class="card stat"><b>{{ stats.surveys }}</b>Сауалнама жауаптары</div>
+</div>
 
-<!-- Өнімдерді басқару бөлімі -->
-<h2>📦 Өнімдерді басқару (CRUD)</h2>
-<table style="margin-bottom: 30px;">
-    <tr>
-        <th>ID</th>
-        <th>Атауы</th>
-        <th>Бағасы</th>
-        <th>Күйі</th>
-        <th>Әрекеттер</th>
-    </tr>
-    {% for p in products %}
-    <tr>
-        <td>{{ p[0] }}</td>
-        <td>{{ p[2] }}</td>
-        <td>{{ p[4] }} ₸</td>
-        <td>{{ 'Белсенді' if p[6] else 'Жасырын' }}</td>
-        <td>
-            <a href="{{ url_for('admin_edit_product', id=p[0]) }}" style="color: #2196F3; text-decoration: none; font-weight: bold;">Өңдеу</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
-
-<!-- Пайдаланушылар тізімі (Password hash-сіз) -->
-<h2>👥 Тіркелген пайдаланушылар тізімі</h2>
-<p style="font-size: 0.9em; color: #666;">Қауіпсіздік талабы бойынша құпия сөздер (password_hash) бұл жерде көрсетілмейді.</p>
-<table style="margin-bottom: 30px;">
-    <tr>
-        <th>ID</th>
-        <th>Email</th>
-        <th>Аты-жөні</th>
-        <th>Рөлі</th>
-        <th>Тіркелген уақыты</th>
-    </tr>
-    {% for u in users %}
-    <tr>
-        <td>{{ u[0] }}</td>
-        <td>{{ u[1] }}</td>
-        <td>{{ u[2] }}</td>
-        <td>{{ u[3] }}</td>
-        <td>{{ u[4] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-
-<!-- Сауалнама жауаптары -->
-<h2>📊 Сауалнама жауаптары (Standby-ден оқылды)</h2>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Пайдаланушы ID</th>
-        <th>Өнім ID</th>
-        <th>Бағасы</th>
-        <th>Ниеті</th>
-        <th>Пікір</th>
-    </tr>
-    {% for s in surveys %}
-    <tr>
-        <td>{{ s[0] }}</td>
-        <td>{{ s[1] }}</td>
-        <td>{{ s[2] }}</td>
-        <td><b>{{ s[3] }} / 5</b></td>
-        <td>{{ s[4] }}</td>
-        <td>{{ s[5] }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="notice" style="margin-top:22px">
+  Барлық өзгерістер (өнім, кеңсе, жою) <b>Primary</b> серверінде орындалады.
+  Сауалнама есебі талдамалық оқу ретінде <b>Standby</b> серверінен алынады.
+</div>
 {% endblock %}

@@ -1,0 +1,11 @@
+<article class="card product-card">
+  {% if p.image_url %}
+    <img src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy">
+  {% endif %}
+  <div class="pad">
+    <h3><a href="{{ url_for('product_detail', slug=p.slug) }}">{{ p.name }}</a></h3>
+    <p class="muted">{{ p.summary }}</p>
+    <div class="price">{{ p.price|money }}</div>
+    <a class="btn btn-sm" href="{{ url_for('product_detail', slug=p.slug) }}">Толығырақ</a>
+  </div>
+</article>

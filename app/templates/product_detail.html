@@ -1,15 +1,55 @@
 {% extends "base.html" %}
-{% block title %}{{ product[2] }}{% endblock %}
+{% block title %}{{ product.name }}{% endblock %}
 {% block content %}
-<h1>{{ product[2] }}</h1>
-{% if product[6] %}
-<img src="{{ product[6] }}" alt="{{ product[2] }}" style="max-width: 100%; height: 300px; object-fit: cover; border-radius: 6px; margin-bottom: 20px;">
-{% endif %}
-<p><b>Қысқаша:</b> {{ product[3] }}</p>
-<h3>Толық сипаттамасы:</h3>
-<p>{{ product[4] }}</p>
-<p><b>Бағасы / Моделі:</b> {{ product[5] }} ₸</p>
-<p style="margin-top: 30px;">
-    <a href="{{ url_for('products') }}" class="btn" style="background: #6c757d;">Каталогқа қайту</a>
-</p>
+<p><a href="{{ url_for('products') }}">← Каталогқа оралу</a></p>
+
+<article class="detail">
+  <div>
+    {% if product.image_url %}
+      <img src="{{ product.image_url }}" alt="{{ product.name }}">
+    {% endif %}
+  </div>
+  <div>
+    <h1>{{ product.name }}</h1>
+    <p class="muted">{{ product.summary }}</p>
+    <div class="price">{{ product.price|money }}</div>
+    {% if product.price_model %}<p class="muted">{{ product.price_model }}</p>{% endif %}
+
+    {% if stats and stats.n %}
+      <p>⭐ Орташа баға: <b>{{ stats.avg }}</b> / 5 ({{ stats.n }} жауап)</p>
+    {% endif %}
+
+    <p>
+      <a class="btn btn-accent" href="{{ url_for('survey', product=product.slug) }}">Бағалау және пікір қалдыру</a>
+    </p>
+  </div>
+</article>
+
+<section class="panel">
+  <h2>Тур туралы</h2>
+  {% for para in product.description|paragraphs %}
+    <p>{{ para }}</p>
+  {% endfor %}
+</section>
+
+<div class="row">
+  {% if product.features %}
+  <section class="panel">
+    <h2>Ерекшеліктері</h2>
+    <ul class="facts">
+      {% for line in product.features|lines %}<li>{{ line }}</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="panel">
+    <h2>Кімге арналған</h2>
+    <p>{{ product.audience or 'Барлығына' }}</p>
+    {% if product.contact %}
+      <h2>Кеңес алу</h2>
+      <p>Сұрақтар бойынша жазыңыз:
+        <a href="mailto:{{ product.contact }}">{{ product.contact }}</a></p>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

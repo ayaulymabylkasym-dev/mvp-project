@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Қате {{ code }}{% endblock %}
+{% block content %}
+<section class="panel narrow center">
+  <h1>{{ code }}</h1>
+  <p>{{ text }}</p>
+  <a class="btn" href="{{ url_for('index') }}">Басты бетке оралу</a>
+</section>
+{% endblock %}

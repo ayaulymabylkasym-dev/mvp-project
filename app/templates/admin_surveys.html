@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Сауалнама жауаптары{% endblock %}
+{% block content %}
+<h1>Сауалнама жауаптары</h1>
+{% include "_admin_nav.html" %}
+<p class="muted">Деректер Standby серверінен оқылады (талдамалық оқу).</p>
+
+<form method="get" class="filters">
+  <div>
+    <label for="product">Өнім</label>
+    <select id="product" name="product">
+      <option value="">Барлығы</option>
+      {% for p in product_list %}
+        <option value="{{ p.id }}" {% if flt.pid == p.id %}selected{% endif %}>{{ p.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="rating">Баға</label>
+    <select id="rating" name="rating">
+      <option value="">Барлығы</option>
+      {% for n in range(1, 6) %}
+        <option value="{{ n }}" {% if flt.rating == n %}selected{% endif %}>{{ n }} ⭐</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit">Сүзу</button>
+  <a class="btn btn-ghost" href="{{ url_for('admin_surveys') }}">Тазарту</a>
+  <a class="btn btn-accent" href="{{ url_for('admin_surveys_csv', product=flt.pid, rating=flt.rating) }}">CSV жүктеу</a>
+</form>
+
+{% if db_error %}
+  <div class="flash error">⚠️ Жауаптарды оқу мүмкін болмады: Standby серверіне қосылу қатесі.</div>
+{% else %}
+<div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>Күні</th><th>Өнім</th><th>Пайдаланушы</th><th>Баға</th><th>Ниет</th><th>Пікір</th><th>Әрекет</th></tr>
+    {% for s in surveys %}
+    <tr>
+      <td>{{ s.id }}</td>
+      <td>{{ s.created_at|dt }}</td>
+      <td>{{ s.product }}</td>
+      <td>{{ s.user_name or 'Жойылған' }}<div class="hint">{{ s.user_email or '' }}</div></td>
+      <td>{{ s.rating }} ⭐</td>
+      <td>{{ INTENTS.get(s.intent, s.intent) }}</td>
+      <td>{{ s.comment or '' }}</td>
+      <td class="actions">
+        <a class="btn btn-sm btn-danger" href="{{ url_for('admin_survey_delete', sid=s.id) }}">Жою</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="muted center">Жауаптар жоқ</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endif %}
+{% endblock %}

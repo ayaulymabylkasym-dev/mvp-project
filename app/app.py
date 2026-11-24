@@ -7,6 +7,7 @@ import secrets
 import time
 from decimal import Decimal, InvalidOperation
 from functools import wraps
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 import psycopg2
 import psycopg2.errors
@@ -16,6 +17,10 @@ from flask import (Flask, Response, abort, flash, jsonify, redirect,
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+
+app.config["SESSION_COOKIE_SECURE"] = True
 app.config.update(
     SECRET_KEY=os.environ["SECRET_KEY"],
     SESSION_COOKIE_HTTPONLY=True,
@@ -137,7 +142,10 @@ def inject_globals():
 def money(value):
     if value is None:
         return "Келісім бойынша"
-    return f"{int(value):,}".replace(",", " ") + " ₸"
+    value = Decimal(value)
+    if value == value.to_integral_value():
+        return f"${int(value):,}"
+    return f"${value:,.2f}"
 
 
 @app.template_filter("dt")
@@ -495,7 +503,8 @@ def contacts():
 
 @app.route("/health")
 def health():
-    out = {"primary": {"ok": False}, "standby": {"ok": False}}
+    out = {"instance": os.getenv("HOSTNAME", "unknown"),
+           "primary": {"ok": False}, "standby": {"ok": False}}
     try:
         row = W("SELECT pg_is_in_recovery() AS in_recovery", fetch="one")
         out["primary"] = {"ok": True, "in_recovery": row["in_recovery"]}

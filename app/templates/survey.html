@@ -1,44 +1,55 @@
 {% extends "base.html" %}
-{% block title %}Сауалнама - Smart Tourism{% endblock %}
+{% block title %}Сауалнама{% endblock %}
 {% block content %}
-<h2>📊 Тур бойынша сауалнама</h2>
-<p>Саяхатыңыз бен ұнаған турыңыз туралы өз пікіріңізді қалдырыңыз. Сіздің бағалауыңыз біздің қызметімізді жақсартуға көмектеседі.</p>
+<section class="panel narrow">
+  <h1>Сауалнама</h1>
+  <p class="muted">Таңдаған турыңызды бағалаңыз. Жауап Primary серверіне жазылады.</p>
 
-{% if error %}
-    <div class="error">{{ error }}</div>
-{% endif %}
-{% if success %}
-    <div class="success">{{ success }}</div>
-{% endif %}
+  {% if not session.get('user_id') %}
+    <div class="notice">
+      Сауалнамаға қатысу үшін <a href="{{ url_for('login', next='/survey') }}">жүйеге кіріңіз</a>
+      немесе <a href="{{ url_for('register') }}">тіркеліңіз</a>.
+    </div>
+  {% elif db_error %}
+    <div class="flash error">⚠️ Турлар тізімін оқу мүмкін болмады: Standby серверіне қосылу қатесі.</div>
+  {% else %}
+    <form method="post" class="stack">
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <div>
+        <label for="product_id">Тур <span class="req">*</span></label>
+        <select id="product_id" name="product_id" required>
+          <option value="">Таңдаңыз…</option>
+          {% for p in products %}
+            <option value="{{ p.id }}" {% if selected == p.slug %}selected{% endif %}>{{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
 
-<form method="POST">
-    <!-- 1. Өнімді таңдау (products кестесінен алынады) -->
-    <label for="product_id">Туристік өнімді таңдаңыз:</label>
-    <select name="product_id" id="product_id" required>
-        <option value="" disabled selected>-- Өнімді таңдаңыз --</option>
-        {% for p in products %}
-        <option value="{{ p[0] }}">{{ p[1] }}</option>
-        {% endfor %}
-    </select>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend><b>Баға (1–5)</b> <span class="req">*</span></legend>
+        <div class="choices">
+          {% for n in range(1, 6) %}
+            <label><input type="radio" name="rating" value="{{ n }}" required>{{ n }} ⭐</label>
+          {% endfor %}
+        </div>
+      </fieldset>
 
-    <!-- 2. Бағалау (1-ден 5-ке дейін, rating өрісі) -->
-    <label for="rating">Бағалау (1 - 5):</label>
-    <select name="rating" id="rating" required>
-        <option value="5">⭐⭐⭐⭐⭐ (5 - Өте жақсы)</option>
-        <option value="4">⭐⭐⭐⭐ (4 - Жақсы)</option>
-        <option value="3">⭐⭐⭐ (3 - Қанағаттанарлық)</option>
-        <option value="2">⭐⭐ (2 - Нашар)</option>
-        <option value="1">⭐ (1 - Өте нашар)</option>
-    </select>
+      <fieldset style="border:0;padding:0;margin:0">
+        <legend><b>Ниетіңіз</b> <span class="req">*</span></legend>
+        <div class="choices">
+          {% for key, label in INTENTS.items() %}
+            <label><input type="radio" name="intent" value="{{ key }}" required>{{ label }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
 
-    <!-- 3. Сапар мақсаты / ниеті (intent өрісі) -->
-    <label for="intent">Сапар ниеті / мақсаты:</label>
-    <input type="text" name="intent" id="intent" required placeholder="Мысалы: Отбасылық демалыс, тауда серуендеу">
-
-    <!-- 4. Пікір немесе ұсыныс (comment өрісі) -->
-    <label for="comment">Пікір немесе ұсыныс:</label>
-    <textarea name="comment" id="comment" rows="4" placeholder="Өз әсерлеріңізді осында жазыңыз..."></textarea>
-
-    <button type="submit" class="btn">Сауалнаманы жіберу (Primary-ге жазу)</button>
-</form>
+      <div>
+        <label for="comment">Пікіріңіз</label>
+        <textarea id="comment" name="comment" rows="4" maxlength="1000"></textarea>
+        <div class="hint">Міндетті емес, 1000 таңбаға дейін.</div>
+      </div>
+      <button type="submit">Жіберу</button>
+    </form>
+  {% endif %}
+</section>
 {% endblock %}

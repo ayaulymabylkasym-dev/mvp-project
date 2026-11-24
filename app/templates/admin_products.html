@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Өнімдерді басқару{% endblock %}
+{% block content %}
+<h1>Өнімдерді басқару</h1>
+{% include "_admin_nav.html" %}
+
+<section class="panel">
+  <h2 style="margin-top:0">{% if editing %}Өнімді өзгерту (№{{ editing }}){% else %}Жаңа өнім қосу{% endif %}</h2>
+  <form method="post" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="{{ 'update' if editing else 'create' }}">
+    {% if editing %}<input type="hidden" name="id" value="{{ editing }}">{% endif %}
+
+    <div class="row">
+      <div>
+        <label for="name">Атауы <span class="req">*</span></label>
+        <input id="name" name="name" type="text" maxlength="140" required value="{{ form.name }}">
+      </div>
+      <div>
+        <label for="slug">Slug</label>
+        <input id="slug" name="slug" type="text" maxlength="140" value="{{ form.slug }}">
+        <div class="hint">Латын әріптері мен сызықша. Бос қалдырсаңыз, атаудан жасалады.</div>
+      </div>
+    </div>
+
+    <div>
+      <label for="summary">Қысқаша сипаттама <span class="req">*</span></label>
+      <input id="summary" name="summary" type="text" maxlength="300" required value="{{ form.summary }}">
+    </div>
+
+    <div>
+      <label for="description">Толық сипаттама <span class="req">*</span></label>
+      <textarea id="description" name="description" rows="8" required>{{ form.description }}</textarea>
+      <div class="hint">Кемінде екі абзац. Абзацтарды бос жолмен бөліңіз.</div>
+    </div>
+
+    <div>
+      <label for="features">Ерекшеліктері</label>
+      <textarea id="features" name="features" rows="5">{{ form.features }}</textarea>
+      <div class="hint">Әр жолға бір ерекшелік (мысалы: «Ұзақтығы: 1 күн»).</div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="audience">Мақсатты аудитория</label>
+        <input id="audience" name="audience" type="text" maxlength="240" value="{{ form.audience }}">
+      </div>
+      <div>
+        <label for="price_model">Баға моделі</label>
+        <input id="price_model" name="price_model" type="text" maxlength="120" value="{{ form.price_model }}">
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="price">Баға ($)</label>
+        <input id="price" name="price" type="text" inputmode="decimal"
+               value="{{ form.price if form.price is not none else '' }}">
+      </div>
+      <div>
+        <label for="contact">Байланыс (email)</label>
+        <input id="contact" name="contact" type="text" maxlength="160" value="{{ form.contact }}">
+      </div>
+    </div>
+
+    <div>
+      <label for="image_url">Сурет жолы</label>
+      <input id="image_url" name="image_url" type="text" placeholder="/static/img/shymbulak.jpg"
+             value="{{ form.image_url if form.image_url else '' }}">
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="is_active" {% if (not form) or form.is_active %}checked{% endif %}>
+      Жарияланған (каталогта көрінеді)
+    </label>
+
+    <div>
+      <button type="submit">{% if editing %}Сақтау{% else %}Қосу{% endif %}</button>
+      {% if editing %}<a class="btn btn-ghost" href="{{ url_for('admin_products') }}">Болдырмау</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<h2>Барлық өнімдер</h2>
+<div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>Атауы</th><th>Баға</th><th>Күйі</th><th>Құрылған</th><th>Әрекет</th></tr>
+    {% for p in products %}
+    <tr>
+      <td>{{ p.id }}</td>
+      <td>{{ p.name }}<div class="hint">{{ p.slug }}</div></td>
+      <td>{{ p.price|money }}</td>
+      <td><span class="badge {{ 'on' if p.is_active else 'off' }}">{{ 'Жарияланған' if p.is_active else 'Жасырын' }}</span></td>
+      <td>{{ p.created_at|dt }}</td>
+      <td class="actions">
+        <a class="btn btn-sm btn-ghost" href="{{ url_for('admin_products', edit=p.id) }}">Өзгерту</a>
+        <form method="post">
+          <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+          <input type="hidden" name="action" value="toggle">
+          <input type="hidden" name="id" value="{{ p.id }}">
+          <button class="btn-sm btn-accent" type="submit">{{ 'Жасыру' if p.is_active else 'Жариялау' }}</button>
+        </form>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('admin_product_delete', pid=p.id) }}">Жою</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted center">Өнімдер жоқ</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

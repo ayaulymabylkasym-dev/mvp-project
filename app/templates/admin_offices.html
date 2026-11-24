@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Кеңселерді басқару{% endblock %}
+{% block content %}
+<h1>Кеңселерді басқару</h1>
+{% include "_admin_nav.html" %}
+
+<section class="panel">
+  <h2 style="margin-top:0">{% if editing %}Кеңсені өзгерту (№{{ editing }}){% else %}Жаңа кеңсе қосу{% endif %}</h2>
+  <form method="post" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="action" value="{{ 'update' if editing else 'create' }}">
+    {% if editing %}<input type="hidden" name="id" value="{{ editing }}">{% endif %}
+
+    <div class="row">
+      <div>
+        <label for="name">Атауы <span class="req">*</span></label>
+        <input id="name" name="name" type="text" maxlength="120" required value="{{ form.name }}">
+      </div>
+      <div>
+        <label for="address">Мекенжайы <span class="req">*</span></label>
+        <input id="address" name="address" type="text" maxlength="240" required value="{{ form.address }}">
+        <div class="hint">Тек ашық немесе шамамен көрсетілген орын. Жеке үй мекенжайын жазбаңыз.</div>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="latitude">Ендік <span class="req">*</span></label>
+        <input id="latitude" name="latitude" type="text" inputmode="decimal" required
+               value="{{ form.latitude if form.latitude is not none else '' }}">
+      </div>
+      <div>
+        <label for="longitude">Бойлық <span class="req">*</span></label>
+        <input id="longitude" name="longitude" type="text" inputmode="decimal" required
+               value="{{ form.longitude if form.longitude is not none else '' }}">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="phone">Телефон</label>
+        <input id="phone" name="phone" type="text" maxlength="40" value="{{ form.phone if form.phone else '' }}">
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" maxlength="160" value="{{ form.email if form.email else '' }}">
+      </div>
+    </div>
+    <div>
+      <button type="submit">{% if editing %}Сақтау{% else %}Қосу{% endif %}</button>
+      {% if editing %}<a class="btn btn-ghost" href="{{ url_for('admin_offices') }}">Болдырмау</a>{% endif %}
+    </div>
+  </form>
+</section>
+
+<h2>Барлық кеңселер</h2>
+<div class="table-wrap">
+  <table>
+    <tr><th>ID</th><th>Атауы</th><th>Мекенжайы</th><th>Координаттар</th><th>Байланыс</th><th>Әрекет</th></tr>
+    {% for o in offices %}
+    <tr>
+      <td>{{ o.id }}</td>
+      <td>{{ o.name }}</td>
+      <td>{{ o.address }}</td>
+      <td>{{ o.latitude }}, {{ o.longitude }}</td>
+      <td>{{ o.phone or '' }}<br>{{ o.email or '' }}</td>
+      <td class="actions">
+        <a class="btn btn-sm btn-ghost" href="{{ url_for('admin_offices', edit=o.id) }}">Өзгерту</a>
+        <a class="btn btn-sm btn-danger" href="{{ url_for('admin_office_delete', oid=o.id) }}">Жою</a>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="muted center">Кеңселер жоқ</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

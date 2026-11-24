@@ -1,46 +1,50 @@
 <!doctype html>
 <html lang="kk">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Smart Tourism MVP{% endblock %}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; color: #333; }
-        header { background: #1f4e79; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        header nav a { color: white; text-decoration: none; margin-left: 20px; font-weight: bold; }
-        header nav a:hover { text-decoration: underline; }
-        .container { max-width: 900px; margin: 30px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn { background: #1f4e79; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn:hover { background: #15395b; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 8px 0 15px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .error { color: #d9534f; background: #fdf7f7; padding: 10px; border-left: 4px solid #d9534f; margin-bottom: 15px; }
-        .success { color: #5cb85c; background: #f7fff7; padding: 10px; border-left: 4px solid #5cb85c; margin-bottom: 15px; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Басты бет{% endblock %} · Smart Tourism</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header>
-        <h2>🌍 Smart Tourism</h2>
-        <nav>
-            <a href="{{ url_for('index') }}">Басты бет</a>
-            <a href="{{ url_for('products') }}">Каталог</a>
-            <a href="{{ url_for('contacts') }}">Байланыстар</a>
-            {% if session.get('user_id') %}
-                {% if session.get('role') == 'admin' %}
-                    <a href="{{ url_for('admin_users') }}">Админ панель</a>
-                {% endif %}
-                <span>Сәлем, {{ session.get('full_name') }}</span>
-                <a href="{{ url_for('logout') }}" style="color: #ffcccc;">Шығу</a>
-            {% else %}
-                <a href="{{ url_for('login') }}">Кіру</a>
-                <a href="{{ url_for('register') }}">Тіркелу</a>
-            {% endif %}
-        </nav>
-    </header>
-    <div class="container">
-        {% block content %}{% endblock %}
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="{{ url_for('index') }}">🏔️ Smart Tourism</a>
+    <nav aria-label="Негізгі навигация">
+      <a href="{{ url_for('index') }}">Басты бет</a>
+      <a href="{{ url_for('products') }}">Каталог</a>
+      <a href="{{ url_for('survey') }}">Сауалнама</a>
+      <a href="{{ url_for('contacts') }}">Байланыстар</a>
+      {% if session.get('role') == 'admin' %}
+        <a href="{{ url_for('admin_home') }}">⚙️ Админ панелі</a>
+      {% endif %}
+    </nav>
+    <div class="auth">
+      {% if session.get('user_id') %}
+        <a href="{{ url_for('profile') }}">👤 {{ session.get('full_name') }}</a>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('logout') }}">Шығу</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">Кіру</a>
+        <a class="btn btn-sm" href="{{ url_for('register') }}">Тіркелу</a>
+      {% endif %}
     </div>
+  </div>
+</header>
+
+<main class="container">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for category, message in msgs %}
+      <div class="flash {{ category }}" role="status">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div class="container">
+    © Smart Tourism · Docker + PostgreSQL primary-standby ·
+    <a href="{{ github_url }}" target="_blank" rel="noopener">GitHub репозиторийі</a>
+  </div>
+</footer>
 </body>
 </html>

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Жоюды растау{% endblock %}
+{% block content %}
+<section class="panel narrow center">
+  <h1>Жоюды растаңыз</h1>
+  <p>Сіз {{ what }} жоясыз: <b>{{ title }}</b></p>
+  {% if warning %}<div class="flash error">{{ warning }}</div>{% endif %}
+  <p class="muted">Бұл әрекетті қайтару мүмкін емес.</p>
+  <form method="post" action="{{ action }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn-danger" type="submit">Иә, жою</button>
+    <a class="btn btn-ghost" href="{{ back }}">Болдырмау</a>
+  </form>
+</section>
+{% endblock %}

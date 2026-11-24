@@ -1,21 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Тіркелу{% endblock %}
 {% block content %}
-<h2>Жүйеге тіркелу</h2>
-{% if error %}
-    <div class="error">{{ error }}</div>
-{% endif %}
-<form method="POST">
-    <label>Аты-жөніңіз:</label>
-    <input type="text" name="full_name" required placeholder="Толық аты-жөніңіз">
-    
-    <label>Email:</label>
-    <input type="email" name="email" required placeholder="example@domain.kz">
-    
-    <label>Пароль:</label>
-    <input type="password" name="password" required placeholder="Құпия сөзді енгізіңіз">
-    
-    <button type="submit" class="btn">Тіркелу</button>
-</form>
-<p>Аккаунтыңыз бар ма? <a href="{{ url_for('login') }}">Кіру</a></p>
+<section class="panel narrow">
+  <h1>Тіркелу</h1>
+  <form method="post" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <div>
+      <label for="full_name">Аты-жөні <span class="req">*</span></label>
+      <input id="full_name" name="full_name" type="text" maxlength="120" required
+             autocomplete="name" value="{{ form.full_name }}">
+    </div>
+    <div>
+      <label for="email">Email <span class="req">*</span></label>
+      <input id="email" name="email" type="email" maxlength="160" required
+             autocomplete="email" value="{{ form.email }}">
+    </div>
+    <div>
+      <label for="password">Пароль <span class="req">*</span></label>
+      <input id="password" name="password" type="password" minlength="8" maxlength="128" required
+             autocomplete="new-password">
+      <div class="hint">Кемінде 8 таңба.</div>
+    </div>
+    <div>
+      <label for="password_confirm">Парольді растау <span class="req">*</span></label>
+      <input id="password_confirm" name="password_confirm" type="password" minlength="8" maxlength="128"
+             required autocomplete="new-password">
+    </div>
+    <button type="submit">Тіркелу</button>
+  </form>
+  <p class="muted">Аккаунтыңыз бар ма? <a href="{{ url_for('login') }}">Кіру</a></p>
+</section>
 {% endblock %}

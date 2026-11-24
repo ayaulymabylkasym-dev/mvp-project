@@ -1,18 +1,34 @@
 {% extends "base.html" %}
-{% block title %}Туристік каталог{% endblock %}
+{% block title %}Каталог{% endblock %}
 {% block content %}
-<h2>Саяхаттар каталогы (Standby серверден оқылды)</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
-    {% for p in products %}
-    <div style="border: 1px solid #ddd; border-radius: 6px; padding: 15px; background: #fff;">
-        {% if p[5] %}
-        <img src="{{ p[5] }}" alt="{{ p[2] }}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 4px;">
-        {% endif %}
-        <h3>{{ p[2] }}</h3>
-        <p>{{ p[3] }}</p>
-        <p><b>Бағасы:</b> {{ p[4] }} ₸</p>
-        <a href="{{ url_for('product_detail', slug=p[1]) }}" class="btn">Толығырақ</a>
-    </div>
-    {% endfor %}
-</div>
+<h1>Турлар каталогы</h1>
+<p class="muted">Деректер Standby серверінен оқылады.</p>
+
+<form method="get" class="filters">
+  <div>
+    <label for="q">Іздеу</label>
+    <input id="q" name="q" type="search" maxlength="80" placeholder="Мысалы: Шарын" value="{{ q }}">
+  </div>
+  <div>
+    <label for="sort">Сұрыптау</label>
+    <select id="sort" name="sort">
+      <option value="new" {% if sort == 'new' %}selected{% endif %}>Жаңалары алдымен</option>
+      <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>Бағасы: арзаннан қымбатқа</option>
+      <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>Бағасы: қымбаттан арзанға</option>
+      <option value="name" {% if sort == 'name' %}selected{% endif %}>Атауы бойынша</option>
+    </select>
+  </div>
+  <button type="submit">Іздеу</button>
+  {% if q %}<a class="btn btn-ghost" href="{{ url_for('products') }}">Тазарту</a>{% endif %}
+</form>
+
+{% if db_error %}
+  <div class="flash error">⚠️ Каталогты оқу мүмкін болмады: Standby серверіне қосылу қатесі. Кейінірек қайталап көріңіз.</div>
+{% elif products %}
+  <div class="grid">
+    {% for p in products %}{% include "_card.html" %}{% endfor %}
+  </div>
+{% else %}
+  <div class="notice">Ештеңе табылмады{% if q %}: «{{ q }}» бойынша нәтиже жоқ{% endif %}.</div>
+{% endif %}
 {% endblock %}

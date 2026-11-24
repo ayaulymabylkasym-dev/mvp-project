@@ -1,230 +1,39 @@
-<!doctype html>
-<html lang="kk">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Smart Tourism - Replicated MVP</title>
-  <style>
-    :root{
-      --primary:#1f4e79; --primary-dark:#163a5a;
-      --green:#15803d; --green-bg:#dcfce7;
-      --orange:#b45309; --orange-bg:#fef3c7;
-      --red:#b91c1c; --red-bg:#fee2e2;
-      --blue-bg:#e7f3fe; --border:#e2e8f0; --text:#1e293b; --muted:#64748b;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:"Segoe UI",Arial,sans-serif; color:var(--text);
-      background:linear-gradient(180deg,#eaf2fb 0,#f8fafc 260px);
-    }
-    .wrap{max-width:980px;margin:0 auto;padding:32px 20px 60px}
-    header{text-align:center;margin-bottom:28px}
-    header h1{margin:0 0 6px;font-size:2rem;color:var(--primary)}
-    header p{margin:0;color:var(--muted)}
-
-    .card{
-      background:#fff;border:1px solid var(--border);border-radius:14px;
-      padding:22px;margin-bottom:22px;box-shadow:0 2px 10px rgba(15,23,42,.05);
-    }
-    .card h2{margin:0 0 14px;font-size:1.25rem;color:var(--primary)}
-
-    /* Primary -> Standby panel */
-    .flow{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch}
-    .node{border-radius:12px;padding:16px;border:2px solid}
-    .node.write{background:var(--green-bg);border-color:#86efac}
-    .node.read{background:var(--orange-bg);border-color:#fcd34d}
-    .node.off{background:var(--red-bg);border-color:#fca5a5}
-    .node .label{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-    .node .role{font-size:1.1rem;font-weight:700;margin:4px 0}
-    .node .meta{font-size:.85rem;color:var(--muted);word-break:break-all}
-    .badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:.75rem;font-weight:700;color:#fff}
-    .badge.rw{background:var(--green)}
-    .badge.ro{background:var(--orange)}
-    .badge.err{background:var(--red)}
-    .arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--primary);font-weight:700}
-    .arrow span{font-size:2rem;line-height:1}
-    .arrow small{font-size:.7rem;color:var(--muted);text-align:center}
-
-    /* Messages */
-    .msg{padding:12px 14px;border-radius:10px;margin-bottom:16px;border-left:6px solid}
-    .msg.ok{background:var(--green-bg);border-color:var(--green);color:#14532d}
-    .msg.error{background:var(--red-bg);border-color:var(--red);color:#7f1d1d}
-    .msg.info{background:var(--blue-bg);border-color:#2196F3}
-
-    /* Form */
-    form.main{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    form.main .full{grid-column:1/-1}
-    label{display:block;font-size:.85rem;font-weight:600;margin-bottom:4px}
-    input{
-      width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:8px;
-      font-size:1rem;font-family:inherit;
-    }
-    input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,78,121,.18)}
-    button,.btn{
-      padding:11px 16px;border:none;border-radius:8px;cursor:pointer;
-      font-size:.95rem;font-family:inherit;text-decoration:none;display:inline-block;
-    }
-    .btn-primary{background:var(--primary);color:#fff}
-    .btn-primary:hover{background:var(--primary-dark)}
-    .btn-edit{background:#e0ecf8;color:var(--primary);padding:6px 12px}
-    .btn-del{background:var(--red-bg);color:var(--red);padding:6px 12px}
-    .btn-cancel{background:#e2e8f0;color:var(--text)}
-
-    /* Table */
-    .table-wrap{overflow-x:auto}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
-    th{background:#f1f5f9;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-    tr:hover td{background:#f8fafc}
-    td.actions{white-space:nowrap}
-    td.actions form{display:inline}
-    .empty{text-align:center;color:var(--muted);padding:24px}
-
-    @media (max-width:700px){
-      .flow{grid-template-columns:1fr}
-      .arrow span{transform:rotate(90deg)}
-      form.main{grid-template-columns:1fr}
-    }
-  </style>
-</head>
-<body>
-<div class="wrap">
-
-  <header>
-    <h1>🌍 Smart Tourism</h1>
-    <p>PostgreSQL Primary &amp; Standby ағындық репликациясы</p>
-  </header>
-
-  <!-- Primary -> Standby ауысуын көрсететін панель -->
-  <div class="card">
-    <h2>🔀 Дерекқор қосылымдары</h2>
-    <div class="flow">
-      <div class="node {% if write_info and write_info.error %}off{% else %}write{% endif %}">
-        <div class="label">Жазу (INSERT / UPDATE / DELETE)</div>
-        {% if write_info and not write_info.error %}
-          <div class="role">{{ write_info.role }}</div>
-          <span class="badge {{ 'ro' if write_info.in_recovery else 'rw' }}">
-            {{ 'read-only' if write_info.in_recovery else 'read-write' }}
-          </span>
-          <div class="meta">IP: {{ write_info.addr }} · pg_is_in_recovery = {{ write_info.in_recovery }}</div>
-        {% else %}
-          <div class="role">Primary қолжетімсіз</div>
-          <span class="badge err">қате</span>
-        {% endif %}
-      </div>
-
-      <div class="arrow">
-        <span>⇒</span>
-        <small>WAL ағыны</small>
-      </div>
-
-      <div class="node {% if read_info and read_info.error %}off{% else %}read{% endif %}">
-        <div class="label">Оқу (SELECT)</div>
-        {% if read_info and not read_info.error %}
-          <div class="role">{{ read_info.role }}</div>
-          <span class="badge {{ 'ro' if read_info.in_recovery else 'rw' }}">
-            {{ 'read-only' if read_info.in_recovery else 'read-write' }}
-          </span>
-          <div class="meta">IP: {{ read_info.addr }} · pg_is_in_recovery = {{ read_info.in_recovery }}</div>
-        {% else %}
-          <div class="role">Standby қолжетімсіз</div>
-          <span class="badge err">қате</span>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Хабарламалар -->
-  {% if saved %}
-    <div class="msg ok">✅ {{ saved_text or 'Операция сәтті орындалды (Primary серверге жазылды)!' }}</div>
-  {% endif %}
-  {% if message %}
-    <div class="msg error">⚠️ {{ message }}</div>
-  {% endif %}
-
-  <!-- Форма -->
-  <div class="card">
-    <h2>{% if edit_client %}✏️ Жазбаны өзгерту (UPDATE → Primary){% else %}📝 Турға жазылу (INSERT → Primary){% endif %}</h2>
-    <form class="main" method="post"
-          action="{% if edit_client %}/update/{{ edit_client[0] }}{% else %}/{% endif %}">
-      <div>
-        <label for="full_name">Аты-жөні</label>
-        <input id="full_name" name="full_name" placeholder="Аты-жөніңіз" maxlength="120"
-               value="{{ edit_client[1] if edit_client else '' }}" required>
-      </div>
-      <div>
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" placeholder="example@mail.com" maxlength="160"
-               value="{{ edit_client[2] if edit_client else '' }}" required>
-      </div>
-      <div>
-        <label for="tour_name">Тур атауы</label>
-        <input id="tour_name" name="tour_name" placeholder="мысалы: Шымбұлаққа тур" maxlength="120"
-               value="{{ edit_client[3] if edit_client else '' }}" required>
-      </div>
-      <div>
-        <label for="visit_date">Күні</label>
-        <input id="visit_date" name="visit_date" type="date"
-               value="{{ edit_client[4] if edit_client else '' }}" required>
-      </div>
-      <div class="full">
-        <button type="submit" class="btn-primary">
-          {% if edit_client %}Сақтау (Primary-де жаңарту){% else %}Турға жазылу (Primary-ге жазу){% endif %}
-        </button>
-        {% if edit_client %}
-          <a href="/" class="btn btn-cancel">Болдырмау</a>
-        {% endif %}
-      </div>
-    </form>
-  </div>
-
-  <!-- Тізім -->
-  <div class="card">
-    <h2>📋 Тіркелген туристер тізімі</h2>
-    <div class="msg info">
-      ℹ️ Кестедегі деректер <b>postgres_standby</b> серверінен оқылып көрсетілуде
-      {% if read_info and not read_info.error %}(IP: {{ read_info.addr }}){% endif %}.
-    </div>
-
-    {% if db_error %}
-      <div class="msg error">
-        ⚠️ Деректерді оқу мүмкін болмады: Standby сервер тоқтатылған немесе қолжетімсіз.
-        Жазу Primary серверге әлі де жұмыс істейді.
-      </div>
+{% extends "base.html" %}
+{% block title %}Басты бет{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Қазақстанды ақылды саяхатпен ашыңыз</h1>
+  <p>Smart Tourism: тау-шаңғы курорттарынан ежелгі кесенелерге дейінгі таңдаулы турлар. Каталогты қарап,
+     турды бағалап, өз пікіріңізді қалдырыңыз.</p>
+  <div class="hero-actions">
+    <a class="btn btn-accent" href="{{ url_for('products') }}">Каталогты ашу</a>
+    {% if not session.get('user_id') %}
+      <a class="btn btn-ghost" href="{{ url_for('register') }}">Тіркелу</a>
     {% else %}
-      <div class="table-wrap">
-        <table>
-          <tr>
-            <th>ID</th>
-            <th>Аты-жөні</th>
-            <th>Email</th>
-            <th>Тур атауы</th>
-            <th>Күні</th>
-            <th>Әрекет</th>
-          </tr>
-          {% for client in clients %}
-          <tr>
-            <td>{{ client[0] }}</td>
-            <td>{{ client[1] }}</td>
-            <td>{{ client[2] }}</td>
-            <td>{{ client[3] }}</td>
-            <td>{{ client[4] }}</td>
-            <td class="actions">
-              <a class="btn btn-edit" href="/edit/{{ client[0] }}">Өзгерту</a>
-              <form method="post" action="/delete/{{ client[0] }}"
-                    onsubmit="return confirm('Жазбаны жою керек пе?')">
-                <button type="submit" class="btn-del">Жою</button>
-              </form>
-            </td>
-          </tr>
-          {% else %}
-          <tr><td colspan="6" class="empty">Әзірге жазба жоқ</td></tr>
-          {% endfor %}
-        </table>
-      </div>
+      <a class="btn btn-ghost" href="{{ url_for('survey') }}">Сауалнамаға қатысу</a>
     {% endif %}
   </div>
+</section>
 
+<h2>Біздің артықшылықтарымыз</h2>
+<div class="grid">
+  <div class="card pad"><h3>🧭 Тәжірибелі гидтер</h3>
+    <p class="muted">Әр турда аймақты жақсы білетін гид жүреді және қауіпсіздікті қадағалайды.</p></div>
+  <div class="card pad"><h3>💰 Түсінікті баға</h3>
+    <p class="muted">Әр туржолдамада бағаға не кіретіні ашық жазылған, жасырын төлем жоқ.</p></div>
+  <div class="card pad"><h3>👥 Шағын топтар</h3>
+    <p class="muted">Топ мөлшері 4–12 адам, сондықтан бағдарламаны қызығушылыққа қарай икемдеуге болады.</p></div>
 </div>
-</body>
-</html>
+
+<h2>Жаңа турлар</h2>
+{% if db_error %}
+  <div class="flash error">Каталогты оқу мүмкін болмады: Standby серверіне қосылу қатесі. Кейінірек қайталап көріңіз.</div>
+{% elif featured %}
+  <div class="grid">
+    {% for p in featured %}{% include "_card.html" %}{% endfor %}
+  </div>
+  <p><a href="{{ url_for('products') }}">Барлық турларды көру →</a></p>
+{% else %}
+  <p class="muted">Қазір белсенді турлар жоқ.</p>
+{% endif %}
+{% endblock %}

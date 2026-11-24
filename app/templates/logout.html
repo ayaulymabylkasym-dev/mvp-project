@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Шығу{% endblock %}
+{% block content %}
+<section class="panel narrow center">
+  <h1>Жүйеден шығу</h1>
+  <p>Шынымен шыққыңыз келе ме?</p>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button type="submit">Иә, шығу</button>
+    <a class="btn btn-ghost" href="{{ url_for('index') }}">Болдырмау</a>
+  </form>
+</section>
+{% endblock %}

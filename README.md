@@ -1,7 +1,6 @@
 # Smart Tourism: Nginx HTTPS және web масштабтау (Лаб 12)
 
-Flask қосымшасы + PostgreSQL primary/standby репликациясы. Алдына Nginx reverse proxy
-қойылған: HTTPS, round robin жүктеме теңгеру, static файлдар, health тексерулері.
+
 
 ## Архитектура
 
@@ -16,11 +15,10 @@ Flask қосымшасы + PostgreSQL primary/standby репликациясы. 
 
 ## 1. Талаптар
 
-Docker Desktop (немесе Docker Engine + Compose), Git, OpenSSL (Git Bash/WSL ішінде бар).
+Docker Desktop (немесе Docker Engine + Compose), Git, OpenSSL.
 
 ## 2. `.env` файлын жасау
 
-Репозиторийде `.env` жоқ (құпия). Жоба түбірінде өзіңіз жасаңыз:
 
 ```
 SECRET_KEY=ұзын_кездейсоқ_жол
@@ -31,8 +29,7 @@ ADMIN_PASSWORD=күшті_пароль
 
 ## 3. Сертификат жасау
 
-Private key репозиторийге жүктелмейді (`.gitignore`). Өз компьютеріңізде жасаңыз
-(Git Bash немесе WSL):
+
 
 ```bash
 mkdir -p nginx/certs
@@ -55,11 +52,6 @@ Windows (PowerShell, **Administrator**):
 Add-Content C:\Windows\System32\drivers\etc\hosts "127.0.0.1  lab.local"
 ```
 
-Linux/WSL:
-
-```bash
-echo "127.0.0.1  lab.local" | sudo tee -a /etc/hosts
-```
 
 ## 5. Іске қосу
 
@@ -70,7 +62,6 @@ docker compose ps
 docker compose exec nginx nginx -t
 ```
 
-Бес сервис те `healthy` болуы тиіс. Дерекқор томдарын өшірмеңіз (`down -v` қолданбаңыз).
 
 ## 6. Тексеру
 
@@ -81,7 +72,7 @@ curl -kI https://lab.local/static/style.css  # 200, Server: nginx, Cache-Control
 for i in 1 2 3 4 5 6; do curl -sk https://lab.local/health; echo; done
 ```
 
-`/health` жауабындағы `instance` екі түрлі болуы керек (балансировка).
+`/health` жауабындағы `instance` екі түрлі болуы керек.
 Браузерде: https://lab.local (self-signed сертификат ескертуі: Advanced → Proceed).
 
 Репликацияны тексеру:
